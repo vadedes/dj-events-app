@@ -1,9 +1,9 @@
 import Layout from '@/components/Layout';
 
-export default function Home() {
+export default function AboutPage() {
     return (
         <Layout>
-            <h1>Welcome to Dj Events!</h1>
+            <h1>Welcome to the about page</h1>
         </Layout>
     );
 }
