@@ -1,7 +1,6 @@
 import Layout from '@/components/Layout';
 import { API_URL } from '@/config/index';
 import EventItem from '@/components/EventItem';
-import Link from 'next/link';
 
 export default function EventsPage({ events }) {
     return (
@@ -12,20 +11,23 @@ export default function EventsPage({ events }) {
             {events.map((evt) => (
                 <EventItem key={evt.id} evt={evt} />
             ))}
-
-            {events.length > 0 && (
-                <Link href='/events'>
-                    <a className='btn-secondary'>View All Events</a>
-                </Link>
-            )}
         </Layout>
     );
 }
 
 //fetch data from server
 export async function getStaticProps() {
-    const res = await fetch(`${API_URL}/api/events?_sort=date:ASC`);
-    const events = await res.json();
+    const req = await fetch(`${API_URL}/api/events?[populate]=*&_sort=date:ASC`);
+    const res = await req.json();
+
+    const events = res.data;
+
+    if (!events) {
+        return {
+            events: null,
+            notFound: true,
+        };
+    }
 
     return {
         props: { events },

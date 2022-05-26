@@ -1,9 +1,11 @@
 import Layout from '@/components/Layout';
-import { API_URL } from '@/config/index';
 import EventItem from '@/components/EventItem';
 import Link from 'next/link';
+import { API_URL } from '@/config/index';
 
 export default function Home({ events }) {
+    console.log(events);
+
     return (
         <Layout>
             <h1>Upcomming Events</h1>
@@ -23,8 +25,17 @@ export default function Home({ events }) {
 }
 
 export async function getStaticProps() {
-    const res = await fetch(`${API_URL}/api/events?_sort=date:ASC`);
-    const events = await res.json();
+    const req = await fetch(`${API_URL}/api/events?[populate]=*&_sort=date:ASC`);
+    const res = await req.json();
+
+    const events = res.data;
+
+    if (!events) {
+        return {
+            events: null,
+            notFound: true,
+        };
+    }
 
     return {
         props: { events: events.slice(0, 3) },
