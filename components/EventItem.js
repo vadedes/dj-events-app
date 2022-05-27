@@ -3,15 +3,12 @@ import Image from 'next/image';
 import styles from '@/styles/EventItem.module.css';
 
 export default function EventItem({ evt }) {
+    const imgSource = evt.attributes.image.data?.attributes.formats.thumbnail.url;
+
     return (
         <div className={styles.event}>
             <div className={styles.img}>
-                <Image
-                    src={evt.attributes.image ? evt.attributes.image.data.attributes.formats.thumbnail.url : '/images/event-default.png'}
-                    width={170}
-                    height={100}
-                    alt={evt.name}
-                />
+                <Image src={imgSource ? imgSource : '/images/event-default.png'} width={170} height={100} alt={evt.name} />
             </div>
             <div className={styles.info}>
                 <span>

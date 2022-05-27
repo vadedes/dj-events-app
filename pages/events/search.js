@@ -1,10 +1,11 @@
+import qs from 'qs';
 import Layout from '@/components/Layout';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import EventItem from '@/components/EventItem';
-import { client } from 'client';
+import { API_URL } from '@/config/index';
 
-export default function EventsPage({ events }) {
+export default function SearchPage({ events }) {
     const router = useRouter();
 
     return (
@@ -26,13 +27,49 @@ export default function EventsPage({ events }) {
     );
 }
 
-let term;
-
 //fetch data from server
 export async function getServerSideProps({ query: { term } }) {
-    const query = `*[_type == "events" && [name, performers, venue, address, description] match "${term}*"]`;
+    const query = qs.stringify(
+        {
+            filters: {
+                $or: [
+                    {
+                        name: {
+                            $containsi: term,
+                        },
+                    },
+                    {
+                        performers: {
+                            $containsi: term,
+                        },
+                    },
+                    {
+                        description: {
+                            $containsi: term,
+                        },
+                    },
+                    {
+                        venue: {
+                            $containsi: term,
+                        },
+                    },
+                ],
+            },
+        },
+        { encode: false }
+    );
 
-    const events = await client.fetch(query);
+    const req = await fetch(`${API_URL}/api/events?${query}&[populate]=*`);
+    const res = await req.json();
+
+    const events = res.data;
+
+    if (!events) {
+        return {
+            events: null,
+            notFound: true,
+        };
+    }
 
     return {
         props: { events },
