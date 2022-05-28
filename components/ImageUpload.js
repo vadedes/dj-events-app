@@ -20,8 +20,6 @@ export default function ImageUpload({ evtId, imageUploaded }) {
             body: formData,
         });
 
-        console.log('form data:', formData, 'evtId:', evtId);
-
         if (res.ok) {
             imageUploaded();
         }

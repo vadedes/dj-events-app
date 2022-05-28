@@ -1,8 +1,10 @@
 import Layout from '@/components/Layout';
-import { API_URL } from '@/config/index';
+import { API_URL, PER_PAGE } from '@/config/index';
 import EventItem from '@/components/EventItem';
+import qs from 'qs';
+import Pagination from '@/components/Pagination';
 
-export default function EventsPage({ events }) {
+export default function EventsPage({ events, total, page }) {
     return (
         <Layout>
             <h1>Events</h1>
@@ -11,16 +13,41 @@ export default function EventsPage({ events }) {
             {events.map((evt) => (
                 <EventItem key={evt.id} evt={evt} />
             ))}
+
+            <Pagination total={total} page={page} />
         </Layout>
     );
 }
 
 //fetch data from server
-export async function getStaticProps() {
-    const req = await fetch(`${API_URL}/api/events?[populate]=*&[sort]=date:DESC`);
-    const res = await req.json();
+export async function getServerSideProps({ query: { page = 1 } }) {
+    //Calculate start page
+    const start = +page === 1 ? 0 : (+page - 1) * PER_PAGE;
 
-    const events = res.data;
+    const query = qs.stringify(
+        {
+            pagination: {
+                start: start,
+                limit: PER_PAGE,
+            },
+            sort: ['date:desc'],
+        },
+        {
+            encodeValuesOnly: true,
+        }
+    );
+
+    //Fetch totals/count
+    const totalRes = await fetch(`${API_URL}/api/events?pagination[withCount]=true`);
+    const totalData = await totalRes.json();
+    const total = totalData.meta.pagination.total;
+
+    //Fetch events
+    const eventReq = await fetch(`${API_URL}/api/events?[populate]=*&${query}`);
+    // const req = await fetch(`${API_URL}/api/events?[populate]=*&[sort]=date:DESC&pagination[limit]=${PER_PAGE}&pagination[withCount]=true`);
+    const eventRes = await eventReq.json();
+
+    const events = eventRes.data;
 
     if (!events) {
         return {
@@ -30,7 +57,6 @@ export async function getStaticProps() {
     }
 
     return {
-        props: { events },
-        revalidate: 1,
+        props: { events, page: +page, total },
     };
 }
