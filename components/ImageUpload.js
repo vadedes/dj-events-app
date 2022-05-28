@@ -10,7 +10,7 @@ export default function ImageUpload({ evtId, imageUploaded }) {
         e.preventDefault();
         const formData = new FormData();
         formData.append('files', image);
-        formData.append('ref', 'events');
+        formData.append('ref', 'api::event.event');
         formData.append('refId', evtId);
         formData.append('field', 'image');
 
@@ -19,6 +19,8 @@ export default function ImageUpload({ evtId, imageUploaded }) {
             method: 'POST',
             body: formData,
         });
+
+        console.log('form data:', formData, 'evtId:', evtId);
 
         if (res.ok) {
             imageUploaded();

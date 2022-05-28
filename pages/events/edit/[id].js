@@ -65,8 +65,13 @@ export default function EditEventPage({ evt }) {
         setValues({ ...values, [name]: value });
     };
 
-    const imageUploaded = (e) => {
-        console.log('Uploaded');
+    const imageUploaded = async (e) => {
+        const res = await fetch(`${API_URL}/api/events/${evt.id}?[populate]=*`);
+        const data = await res.json();
+        const filteredData = data.data;
+        // console.log(filteredData.attributes?.image?.data?.attributes.formats.thumbnail.url);
+        setImagePreview(filteredData.attributes?.image?.data?.attributes.formats.thumbnail.url);
+        setShowModal(false);
     };
 
     return (
