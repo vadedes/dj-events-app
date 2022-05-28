@@ -13,6 +13,13 @@ export default function LoginPage() {
 
     const { login, error } = useContext(AuthContext);
 
+    // useEffect(() => {
+    //     if (error) {
+    //         console.log('error', error);
+    //         // toast.error(error);
+    //     }
+    // }, [error]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         login({ email, password });

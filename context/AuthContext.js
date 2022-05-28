@@ -1,12 +1,13 @@
 import { createContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { API_URL } from '@/config/index';
+import { NEXT_URL } from '@/config/index';
 import { defaultConfig } from 'next/dist/server/config-shared';
+import { toast } from 'react-toastify';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState();
+    const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
 
     //Register user
@@ -16,7 +17,28 @@ export const AuthProvider = ({ children }) => {
 
     //Login user
     const login = async ({ email: identifier, password }) => {
-        console.log({ identifier, password });
+        //fetch frontend api page (api/login) <- this route will act as a bridge for security
+        const res = await fetch(`${NEXT_URL}/api/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                identifier,
+                password,
+            }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            setUser(data.user);
+        } else {
+            toast.error(data.message, {
+                type: 'error',
+                theme: 'colored',
+            });
+        }
     };
 
     //Logout user
