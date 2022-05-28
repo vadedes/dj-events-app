@@ -30,6 +30,8 @@ export default function EventPage({ evt }) {
         }
     };
 
+    const imgSource = evt.attributes.image?.data?.attributes.formats.medium.url;
+
     return (
         <Layout>
             <div className={styles.event}>
@@ -49,9 +51,9 @@ export default function EventPage({ evt }) {
                 </span>
                 <h1>{evt.attributes.name}</h1>
                 <ToastContainer />
-                {evt.attributes.image && (
+                {imgSource && (
                     <div className={styles.image}>
-                        <Image src={evt.attributes.image.data.attributes.formats.medium.url} width={960} height={600} alt={evt.attributes.name} />
+                        <Image src={imgSource ? imgSource : '/images/event-default.png'} width={960} height={600} alt={evt.attributes.name} />
                     </div>
                 )}
 
