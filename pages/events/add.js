@@ -7,7 +7,7 @@ import styles from '@/styles/Form.module.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function AddEventPage() {
+export default function AddEventPage({ token }) {
     const [values, setValues] = useState({
         name: '',
         performers: '',
@@ -36,12 +36,17 @@ export default function AddEventPage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ data: values }),
         });
 
         //check if res is not okay
         if (!req.ok) {
+            if (req.status === 403 || req.status === 401) {
+                toast.error('No token included');
+                return;
+            }
             toast.error('Something Went Wrong with your request');
         } else {
             const res = await req.json();

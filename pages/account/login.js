@@ -23,7 +23,6 @@ export default function LoginPage() {
     const handleSubmit = (e) => {
         e.preventDefault();
         login({ email, password });
-
         setEmail('');
         setPassword('');
     };
