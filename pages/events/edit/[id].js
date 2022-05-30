@@ -11,8 +11,9 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Image from 'next/image';
 import ImageUpload from '@/components/ImageUpload';
+import { parseCookies } from '@/helpers/index';
 
-export default function EditEventPage({ evt }) {
+export default function EditEventPage({ evt, token }) {
     const [values, setValues] = useState({
         name: evt.attributes.name,
         performers: evt.attributes.performers,
@@ -46,13 +47,18 @@ export default function EditEventPage({ evt }) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ data: values }),
         });
 
         //check if res is not okay
         if (!req.ok) {
-            toast.error('Something Went Wrong with your request');
+            if (req.status === 401 || req.status === 403) {
+                toast.error('You are not authorized update this event');
+            }
+            // toast.error('Something Went Wrong with your request');
+            // return;
         } else {
             const res = await req.json();
             const evt = res.data.attributes;
@@ -137,6 +143,8 @@ export default function EditEventPage({ evt }) {
 }
 
 export async function getServerSideProps({ params: { id }, req }) {
+    const { token } = parseCookies(req);
+
     const dataReq = await fetch(`${API_URL}/api/events/${id}?[populate]=*`);
     const res = await dataReq.json();
 
@@ -154,6 +162,7 @@ export async function getServerSideProps({ params: { id }, req }) {
     return {
         props: {
             evt,
+            token,
         },
     };
 }

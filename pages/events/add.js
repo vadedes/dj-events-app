@@ -6,6 +6,7 @@ import { API_URL } from '@/config/index';
 import styles from '@/styles/Form.module.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { parseCookies } from '@/helpers/index';
 
 export default function AddEventPage({ token }) {
     const [values, setValues] = useState({
@@ -102,4 +103,14 @@ export default function AddEventPage({ token }) {
             </form>
         </Layout>
     );
+}
+
+export async function getServerSideProps({ req }) {
+    const { token } = parseCookies(req);
+
+    return {
+        props: {
+            token,
+        },
+    };
 }
