@@ -9,8 +9,11 @@ import Image from 'next/image';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/router';
+import { parseCookies } from '@/helpers/index';
+import EventMap from '@/components/EventMap';
+// import EventMapLegacy from '@/components/EventMapLegacy';
 
-export default function EventPage({ evt }) {
+export default function EventPage({ evt, token }) {
     const router = useRouter();
     const { user } = useContext(AuthContext);
 
@@ -20,9 +23,14 @@ export default function EventPage({ evt }) {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
                 },
             });
             const data = await res.json();
+
+            if (res.status === 401 || res.status === 403) {
+                toast.error(`You're not authorized to delete this event`);
+            }
 
             if (!res.ok) {
                 toast.error(data.message);
@@ -69,6 +77,9 @@ export default function EventPage({ evt }) {
                 <h3>Venue: {evt.attributes.venue}</h3>
                 <p>{evt.attributes.address}</p>
 
+                <EventMap evt={evt} />
+                {/* <EventMapLegacy evt={evt} /> */}
+
                 <Link href='/events'>
                     <a className={styles.back}>{'<'} Go Back</a>
                 </Link>
@@ -77,9 +88,11 @@ export default function EventPage({ evt }) {
     );
 }
 
-export async function getServerSideProps({ query: { slug } }) {
-    const req = await fetch(`${API_URL}/api/events?[populate]=*&slug=${slug}`);
-    const res = await req.json();
+export async function getServerSideProps({ query: { slug }, req }) {
+    const { token } = parseCookies(req);
+
+    const eventReq = await fetch(`${API_URL}/api/events?[populate]=*&slug=${slug}`);
+    const res = await eventReq.json();
 
     const events = res.data;
 
@@ -95,6 +108,7 @@ export async function getServerSideProps({ query: { slug } }) {
     return {
         props: {
             evt: filteredEvents[0],
+            token,
         },
     };
 }
